@@ -5,19 +5,30 @@
   <title>Cheques</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: row;
-      gap: 20px;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: flex-start;
       padding: 20px;
-      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .content {
+      max-width: 700px;
+      width: 100%;
     }
 
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 600px;
+      margin-top: 10px;
     }
 
     th, td {
@@ -43,15 +54,18 @@
     }
 
     #cheque-viewer {
-      flex: 1;
-      border: 2px solid #eee;
+      position: sticky;
+      top: 20px;
+      width: 40%;
+      max-width: 500px;
+      height: fit-content;
       padding: 10px;
+      border: 2px solid #eee;
+      background-color: #fafafa;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 300px;
-      max-width: 600px;
-      width: 100%;
     }
 
     #cheque-viewer img {
@@ -68,41 +82,38 @@
     @media (max-width: 768px) {
       body {
         flex-direction: column;
-        padding: 10px;
+        align-items: stretch;
       }
 
       #cheque-viewer {
+        position: static;
+        width: 100%;
         max-width: 100%;
-        min-height: 250px;
-      }
-
-      table {
-        font-size: 14px;
+        margin-top: 20px;
       }
     }
   </style>
 </head>
 <body>
 
-<div>
-  <h2>Cheques</h2>
+<div class="content">
+  <h2 style="text-align: center;">Cheques</h2>
   <table id="cheques-table">
     <thead>
-      <tr><th>Date</th><th>Sum</th><th>File</th></tr>
+      <tr><th>Date</th><th>Sum</th></tr>
     </thead>
     <tbody></tbody>
     <tfoot>
       <tr>
-        <td>Summary:</td>
+        <td>Total:</td>
         <td id="total-sum">—</td>
-        <td></td>
       </tr>
     </tfoot>
   </table>
 </div>
 
 <div id="cheque-viewer">
-  <p>Нажмите на сумму, чтобы посмотреть чек</p>
+  <p>Нажмите на ряд, чтобы посмотреть чек</p>
 </div>
 
 <script>
@@ -128,10 +139,10 @@ function loadCSV() {
 
       parsed.forEach(entry => {
         const tr = document.createElement('tr');
+        tr.setAttribute('data-image', entry.image);  // Добавляем data-атрибут для картинки
         tr.innerHTML = `
           <td>${entry.date}</td>
-          <td class="amount" data-image="${entry.image}">${entry.amount}</td>
-          <td>${entry.image}</td>
+          <td class="amount">${entry.amount}</td>
         `;
         table.appendChild(tr);
 
@@ -141,9 +152,10 @@ function loadCSV() {
 
       document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
 
-      document.querySelectorAll('.amount').forEach(cell => {
-        cell.addEventListener('click', () => {
-          const image = cell.getAttribute('data-image');
+      // Обработчик клика на всю строку
+      document.querySelectorAll('#cheques-table tbody tr').forEach(row => {
+        row.addEventListener('click', () => {
+          const image = row.getAttribute('data-image');
           const viewer = document.getElementById('cheque-viewer');
           viewer.innerHTML = `<img src="images/${image}" alt="Чек">`;
         });
@@ -153,6 +165,7 @@ function loadCSV() {
 
 window.onload = loadCSV;
 </script>
+
 
 </body>
 </html>
