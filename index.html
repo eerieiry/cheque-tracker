@@ -176,6 +176,7 @@
             tr.setAttribute('data-image', entry.image);
             const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
             tr.innerHTML = `
+              <td>${entry.date}</td>
               <td class="amount">
               <span class="amount-value">${entry.amount}</span>
               ${noteHTML}
