@@ -144,7 +144,7 @@
     <span class="modal-close" onclick="closeModal(event)">&times;</span>
     <img class="modal-content" id="modal-img" alt="Чек" />
   </div>
-  <script>
+   <script>
     function loadCSV() {
       fetch('data.csv')
         .then((response) => response.text())
@@ -154,10 +154,10 @@
           const parsed = rows.map((row) => {
             const parts = row.split(';');
             return {
-              date: parts[0].trim(),
-              amount: parts[1].trim(),
-              image: parts[2].trim(),
-              note: (parts[3] || '').trim()
+              date: parts[0]?.trim() || '',
+              amount: parts[1]?.trim() || '',
+              image: parts[2]?.trim() || '',
+              note: parts[3]?.trim() || ''
             };
           });
           parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -178,11 +178,13 @@
           document.querySelectorAll('#cheques-table tbody tr').forEach((row) => {
             row.addEventListener('click', () => {
               const image = row.getAttribute('data-image');
-              if (window.innerWidth <= 768) {
-                showModal(image);
-              } else {
-                const viewer = document.getElementById('cheque-viewer');
-                viewer.innerHTML = `<img src="images/${image}" alt="Чек">`;
+              if (image) {
+                if (window.innerWidth <= 768) {
+                  showModal(image);
+                } else {
+                  const viewer = document.getElementById('cheque-viewer');
+                  viewer.innerHTML = `<img src="images/${image}" alt="Чек">`;
+                }
               }
             });
           });
