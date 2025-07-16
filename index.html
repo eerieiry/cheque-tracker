@@ -41,16 +41,25 @@
       font-size: 1.1em;
     }
     td.amount {
-      color: inherit;
-      cursor: default;
-      text-decoration: none;
-      white-space: nowrap;
+      position: relative;
+      padding-right: 40px;
     }
-    .inline-note {
+    .amount-value {
+      display: inline-block;
+      text-align: center;
+      width: 100%;
+    }
+    
+  .inline-note {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
       font-size: 12px;
       color: #888;
-      margin-left: 6px;
+      white-space: nowrap;
     }
+
     #cheque-viewer {
       position: sticky;
       top: 20px;
@@ -167,8 +176,10 @@
             tr.setAttribute('data-image', entry.image);
             const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
             tr.innerHTML = `
-              <td>${entry.date}</td>
-              <td class="amount">${entry.amount}${noteHTML}</td>
+              <td class="amount">
+              <span class="amount-value">${entry.amount}</span>
+              ${noteHTML}
+              </td>
             `;
             table.appendChild(tr);
             const number = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
