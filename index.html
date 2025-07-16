@@ -48,10 +48,11 @@
     }
 
     td.amount {
-      color: #0077cc;
-      cursor: pointer;
-      text-decoration: underline;
+      color: inherit;
+      cursor: default;
+      text-decoration: none;
     }
+
 
     #cheque-viewer {
       position: sticky;
@@ -70,7 +71,6 @@
 
     #cheque-viewer img {
       max-width: 100%;
-      max-height: 80vh;
       object-fit: contain;
     }
 
@@ -152,7 +152,6 @@ function loadCSV() {
 
       document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
 
-      // Обработчик клика на всю строку
       document.querySelectorAll('#cheques-table tbody tr').forEach(row => {
         row.addEventListener('click', () => {
           const image = row.getAttribute('data-image');
