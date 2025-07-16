@@ -143,7 +143,7 @@
 </head>
 <body>
   <div style="text-align: center; margin-bottom: 20px;">
-  <a href="income.html" class="nav-button">Cheques</a>
+  <a href="index.html" class="nav-button">Cheques</a>
   </div>
   <div class="content">
     <h2 style="text-align: center;">Incomes</h2>
@@ -159,7 +159,8 @@
       <tfoot>
         <tr>
           <td>Total:</td>
-          <td id="total-sum">—</td>
+          <td id="total-income">—</td>
+          <td id="total-amount">—</td>
         </tr>
       </tfoot>
     </table>
@@ -169,16 +170,19 @@
   </div>
   <div id="modal" class="modal" onclick="closeModal(event)">
     <span class="modal-close" onclick="closeModal(event)">&times;</span>
-    <img class="modal-content" id="modal-img" alt="Чек" />
+    <img class="modal-content" id="modal-img" alt="Квитанция" />
   </div>
-   <script>
+
+  <script>
     function loadCSV() {
       fetch('data_income.csv')
-        .then((response) => response.text())
-        .then((text) => {
+        .then(response => response.text())
+        .then(text => {
           const rows = text.trim().split('\n').slice(1);
-          let total = 0;
-          const parsed = rows.map((row) => {
+          let total_income = 0;
+          let total_amount = 0;
+
+          const parsed = rows.map(row => {
             const parts = row.split(';');
             return {
               date: parts[0]?.trim() || '',
@@ -187,25 +191,31 @@
               image: parts[3]?.trim() || ''
             };
           });
+
           parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
           const table = document.querySelector('#cheques-table tbody');
-          parsed.forEach((entry) => {
+
+          parsed.forEach(entry => {
             const tr = document.createElement('tr');
             tr.setAttribute('data-image', entry.image);
-            const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
             tr.innerHTML = `
               <td>${entry.date}</td>
-              <td class="amount">
-              <span class="amount-value">${entry.amount}</span>
-              ${noteHTML}
-              </td>
+              <td class="income"><span class="amount-value">${entry.income}</span></td>
+              <td class="amount"><span class="amount-value">${entry.amount}</span></td>
             `;
             table.appendChild(tr);
-            const number = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
-            if (!isNaN(number)) total += number;
+
+            const incomeNum = parseFloat(entry.income.replace(',', '.').replace(/[^\d.]/g, ''));
+            if (!isNaN(incomeNum)) total_income += incomeNum;
+
+            const amountNum = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
+            if (!isNaN(amountNum)) total_amount += amountNum;
           });
-          document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
-          document.querySelectorAll('#cheques-table tbody tr').forEach((row) => {
+
+          document.getElementById('total-income').innerText = `${total_income.toFixed(2)} €`;
+          document.getElementById('total-amount').innerText = `${total_amount.toFixed(2)} ₴`;
+
+          document.querySelectorAll('#cheques-table tbody tr').forEach(row => {
             row.addEventListener('click', () => {
               const image = row.getAttribute('data-image');
               if (image) {
@@ -213,24 +223,27 @@
                   showModal(image);
                 } else {
                   const viewer = document.getElementById('cheque-viewer');
-                  viewer.innerHTML = `<img src="images/${image}" alt="Чек">`;
+                  viewer.innerHTML = `<img src="images/${image}" alt="Квитанция">`;
                 }
               }
             });
           });
         });
     }
+
     function showModal(image) {
       const modal = document.getElementById('modal');
       const modalImg = document.getElementById('modal-img');
       modalImg.src = `images/${image}`;
       modal.classList.add('active');
     }
+
     function closeModal(event) {
       if (event.target.id === 'modal' || event.target.classList.contains('modal-close')) {
         document.getElementById('modal').classList.remove('active');
       }
     }
+
     window.onload = loadCSV;
   </script>
 </body>
