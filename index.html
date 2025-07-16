@@ -5,7 +5,9 @@
   <title>Cheques</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -16,41 +18,39 @@
       padding: 20px;
       gap: 30px;
     }
-
     .content {
       max-width: 700px;
       width: 100%;
     }
-
     table {
       border-collapse: collapse;
       width: 100%;
       margin-top: 10px;
     }
-
-    th,
-    td {
+    th, td {
       border: 1px solid #ccc;
       padding: 12px 16px;
       text-align: center;
     }
-
     th {
       background-color: #f4f4f4;
     }
-
     tfoot td {
       font-weight: bold;
       background-color: #fffacc;
       font-size: 1.1em;
     }
-
     td.amount {
       color: inherit;
       cursor: default;
       text-decoration: none;
+      white-space: nowrap;
     }
-
+    .inline-note {
+      font-size: 12px;
+      color: #888;
+      margin-left: 6px;
+    }
     #cheque-viewer {
       position: sticky;
       top: 20px;
@@ -65,31 +65,26 @@
       align-items: center;
       min-height: 300px;
     }
-
     #cheque-viewer img {
       max-width: 100%;
-      min-height: 100vh;
+      max-height: 80vh;
       object-fit: contain;
     }
-
     #cheque-viewer p {
       color: #888;
       text-align: center;
     }
-
     @media (max-width: 768px) {
       body {
         flex-direction: column;
         align-items: stretch;
       }
-
       #cheque-viewer {
-        display: none; 
+        display: none;
       }
     }
-
     .modal {
-      display: none; 
+      display: none;
       position: fixed;
       z-index: 10000;
       left: 0;
@@ -100,11 +95,9 @@
       justify-content: center;
       align-items: center;
     }
-
     .modal.active {
       display: flex;
     }
-
     .modal-content {
       max-width: 90%;
       max-height: 80vh;
@@ -112,7 +105,6 @@
       border-radius: 6px;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
     }
-
     .modal-close {
       position: fixed;
       top: 20px;
@@ -145,16 +137,13 @@
       </tfoot>
     </table>
   </div>
-
   <div id="cheque-viewer">
     <p>Нажмите на строку, чтобы посмотреть чек</p>
   </div>
-
   <div id="modal" class="modal" onclick="closeModal(event)">
     <span class="modal-close" onclick="closeModal(event)">&times;</span>
     <img class="modal-content" id="modal-img" alt="Чек" />
   </div>
-
   <script>
     function loadCSV() {
       fetch('data.csv')
@@ -162,39 +151,30 @@
         .then((text) => {
           const rows = text.trim().split('\n').slice(1);
           let total = 0;
-
           const parsed = rows.map((row) => {
-            const [date, amount, image] = row.split(';');
+            const parts = row.split(';');
             return {
-              date: date.trim(),
-              amount: amount.trim(),
-              image: image.trim(),
+              date: parts[0].trim(),
+              amount: parts[1].trim(),
+              image: parts[2].trim(),
+              note: (parts[3] || '').trim()
             };
           });
-
           parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
-
           const table = document.querySelector('#cheques-table tbody');
-
           parsed.forEach((entry) => {
             const tr = document.createElement('tr');
             tr.setAttribute('data-image', entry.image);
+            const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
             tr.innerHTML = `
               <td>${entry.date}</td>
-              <td class="amount">${entry.amount}</td>
+              <td class="amount">${entry.amount}${noteHTML}</td>
             `;
             table.appendChild(tr);
-
-            const number = parseFloat(
-              entry.amount.replace(',', '.').replace(/[^\d.]/g, '')
-            );
+            const number = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
             if (!isNaN(number)) total += number;
           });
-
-          document.getElementById('total-sum').innerText = `${total.toFixed(
-            2
-          )} ₴`;
-
+          document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
           document.querySelectorAll('#cheques-table tbody tr').forEach((row) => {
             row.addEventListener('click', () => {
               const image = row.getAttribute('data-image');
@@ -208,23 +188,17 @@
           });
         });
     }
-
     function showModal(image) {
       const modal = document.getElementById('modal');
       const modalImg = document.getElementById('modal-img');
       modalImg.src = `images/${image}`;
       modal.classList.add('active');
     }
-
     function closeModal(event) {
-      if (
-        event.target.id === 'modal' ||
-        event.target.classList.contains('modal-close')
-      ) {
+      if (event.target.id === 'modal' || event.target.classList.contains('modal-close')) {
         document.getElementById('modal').classList.remove('active');
       }
     }
-
     window.onload = loadCSV;
   </script>
 </body>
