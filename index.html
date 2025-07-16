@@ -83,6 +83,20 @@
       color: #888;
       text-align: center;
     }
+    .nav-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+    .nav-button:hover {
+      background-color: #0b7dda;
+    }
+
     @media (max-width: 768px) {
       body {
         flex-direction: column;
@@ -128,6 +142,9 @@
   </style>
 </head>
 <body>
+  <div style="text-align: center; margin-bottom: 20px;">
+  <a href="income.html" class="nav-button">Incomes</a>
+  </div>
   <div class="content">
     <h2 style="text-align: center;">Cheques</h2>
     <table id="cheques-table">
