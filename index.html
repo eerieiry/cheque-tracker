@@ -171,66 +171,85 @@
     <img class="modal-content" id="modal-img" alt="Чек" />
   </div>
    <script>
-    function loadCSV() {
-      fetch('data.csv')
-        .then((response) => response.text())
-        .then((text) => {
-          const rows = text.trim().split('\n').slice(1);
-          let total = 0;
-          const parsed = rows.map((row) => {
-            const parts = row.split(';');
-            return {
-              date: parts[0]?.trim() || '',
-              amount: parts[1]?.trim() || '',
-              image: parts[2]?.trim() || '',
-              note: parts[3]?.trim() || ''
-            };
-          });
-          parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
-          const table = document.querySelector('#cheques-table tbody');
-          parsed.forEach((entry) => {
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-image', entry.image);
-            const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
-            tr.innerHTML = `
-              <td>${entry.date}</td>
-              <td class="amount">
+  function loadCSV() {
+    fetch('data.csv')
+      .then((response) => response.text())
+      .then((text) => {
+        const rows = text.trim().split('\n').slice(1);
+        let total = 0;
+        const parsed = rows.map((row) => {
+          const parts = row.split(';');
+          return {
+            date: parts[0]?.trim() || '',
+            amount: parts[1]?.trim() || '',
+            image: parts[2]?.trim() || '',
+            note: parts[3]?.trim() || ''
+          };
+        });
+
+        parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const table = document.querySelector('#cheques-table tbody');
+        parsed.forEach((entry) => {
+          const tr = document.createElement('tr');
+          tr.setAttribute('data-image', entry.image);
+          const noteHTML = entry.note ? `<span class="inline-note">${entry.note}</span>` : '';
+          tr.innerHTML = `
+            <td>${entry.date}</td>
+            <td class="amount">
               <span class="amount-value">${entry.amount}</span>
               ${noteHTML}
-              </td>
-            `;
-            table.appendChild(tr);
-            const number = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
-            if (!isNaN(number)) total += number;
-          });
-          document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
-          document.querySelectorAll('#cheques-table tbody tr').forEach((row) => {
-            row.addEventListener('click', () => {
-              const image = row.getAttribute('data-image');
-              if (image) {
-                if (window.innerWidth <= 768) {
-                  showModal(image);
-                } else {
-                  const viewer = document.getElementById('cheque-viewer');
-                  viewer.innerHTML = `<img src="images/${image}" alt="Чек">`;
-                }
+            </td>
+          `;
+          table.appendChild(tr);
+          const number = parseFloat(entry.amount.replace(',', '.').replace(/[^\d.]/g, ''));
+          if (!isNaN(number)) total += number;
+        });
+
+        document.getElementById('total-sum').innerText = `${total.toFixed(2)} ₴`;
+
+        document.querySelectorAll('#cheques-table tbody tr').forEach((row) => {
+          row.addEventListener('click', () => {
+            const image = row.getAttribute('data-image');
+            if (image) {
+              if (window.innerWidth <= 768) {
+                showModal(image);
+              } else {
+                const viewer = document.getElementById('cheque-viewer');
+                viewer.innerHTML = `
+                  <div id="image-container" style="overflow: hidden; width: 100%; display: flex; justify-content: center;">
+                    <img id="zoom-image" src="images/${image}" alt="Чек" style="max-width: 100%; transition: transform 0.2s ease;" />
+                  </div>
+                `;
+                const img = document.getElementById('zoom-image');
+                let scale = 1;
+                img.addEventListener('wheel', (e) => {
+                  e.preventDefault();
+                  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                  scale = Math.min(Math.max(0.5, scale + delta), 3);
+                  img.style.transform = `scale(${scale})`;
+                });
               }
-            });
+            }
           });
         });
+      });
+  }
+
+  function showModal(image) {
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    modalImg.src = `images/${image}`;
+    modal.classList.add('active');
+  }
+
+  function closeModal(event) {
+    if (event.target.id === 'modal' || event.target.classList.contains('modal-close')) {
+      document.getElementById('modal').classList.remove('active');
     }
-    function showModal(image) {
-      const modal = document.getElementById('modal');
-      const modalImg = document.getElementById('modal-img');
-      modalImg.src = `images/${image}`;
-      modal.classList.add('active');
-    }
-    function closeModal(event) {
-      if (event.target.id === 'modal' || event.target.classList.contains('modal-close')) {
-        document.getElementById('modal').classList.remove('active');
-      }
-    }
-    window.onload = loadCSV;
-  </script>
+  }
+
+  window.onload = loadCSV;
+</script>
+
 </body>
 </html>
